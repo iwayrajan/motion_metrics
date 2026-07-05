@@ -110,4 +110,5 @@ Then `view` each extracted frame — check text isn't clipped/overlapping, color
 
 - `references/chart-types.md` — full parameter spec (layout, colors, timing) for all 8 chart types, restructured as tables for quick lookup
 - `references/animation-techniques.md` — 8 motion/rendering techniques (spring bounce, line/area tracing, odometer counters, idle bob, liquid-fill rings, HUD callouts, race-overtake flash, treemap zoom) to mix into whichever chart type is chosen — use this alongside chart-types.md when building the options menu in step 2 of the workflow
+- `references/audio.md` — how to source, place, and wire in background audio; includes a catalog of tracks already in this repo's `public/audio/`
 - `references/environment-setup.md` — new-project scaffold checklist (package.json, tsconfig, folder structure)
