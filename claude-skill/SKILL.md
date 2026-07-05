@@ -45,10 +45,15 @@ import "@fontsource/inter/700.css";
 
 See `references/environment-setup.md` for the full checklist (project scaffold, tsconfig, render/verify commands) if starting a brand new project.
 
+## If this skill directory isn't present in this sandbox
+User skills (`/mnt/skills/user/`) are sandbox-local and don't reliably carry across separate chats/sessions. If you don't find this skill mounted, check the project repo for a `claude-skill/` folder (or similarly named backup) — that's the canonical fallback copy. Use it exactly as you would this file.
+
 ## Workflow
 
-1. **Check for an existing project first.** If the person already has a Remotion project going in this conversation/sandbox (or a repo to clone), add a new `<Composition>` to it rather than starting over — reuse the Chrome config, font setup, and any shared components.
-2. **Propose 2-4 options before building — don't just pick one and go.** For any content request ("make a video about X"), cross-reference the decision table below with `references/animation-techniques.md` and surface a short menu of genuinely different takes (e.g. for a price-over-time request: plain Zoom Line Graph vs. Spring Bars vs. Odometer hero-number). Use `ask_user_input_v0` with tappable options so the person can pick with one tap rather than typing. Wait for their choice before writing any code — this is a hard stop, not a formality.
+**Step 2 is a hard stop — not a suggestion, not something to skip because a similar composition already exists in the repo.** Even if you can already see the obvious answer (e.g. a `BtcJunePrices.tsx` sitting right there as a template for an ETH request), that similarity is *why* the person needs a moment to confirm — not a reason to silently reuse it. Present options and wait for a reply before writing or copying any component code.
+
+1. **Check for an existing project first.** If the person already has a Remotion project going in this conversation/sandbox (or a repo to clone), add a new `<Composition>` to it rather than starting over — reuse the Chrome config, font setup, and any shared components. This step is about reusing *infrastructure* (config, fonts, folder layout) — it does not license reusing a prior *content* decision without asking (see step 2).
+2. **Propose 2-4 options before building — don't just pick one and go.** For any content request ("make a video about X"), cross-reference the decision table below with `references/animation-techniques.md` and surface a short menu of genuinely different takes (e.g. for a price-over-time request: plain Zoom Line Graph vs. Spring Bars vs. Odometer hero-number). Use `ask_user_input_v0` with tappable options so the person can pick with one tap rather than typing. **Wait for their choice before writing any code, copying any existing composition as a template, or running any data lookups** — this includes not jumping straight to "this looks just like the BTC one, I'll reuse that" even when it's true.
 3. **Get real data before building anything financial or factual.** See "Data integrity" below — this is the single most common way these videos go wrong.
 4. **Scaffold**: config constants (timing/layout), a data file, one component per visual element, a main composition file that assembles them with `<Sequence>`, register in `Root.tsx`.
 5. **Render and actually look at it** before handing it over — see Verification below. Don't ship a render you haven't visually checked.
