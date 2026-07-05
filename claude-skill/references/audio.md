@@ -47,7 +47,7 @@ These were sourced by the person (filenames suggest Pixabay — verify license t
 | `night-detective-226857.mp3` | 116.0s | Moody/noir — crypto crash narratives, dramatic price drops |
 | `synthwave-laser-drift-251660.mp3` | 120.0s | Retro-electronic, driving — crypto/stock content generally, bar chart races, futuristic feel |
 
-When asked for a track suggestion, propose 1-2 from this table matching the video's tone (via `ask_user_input_v0` if genuinely unsure between two) rather than defaulting to the same one every time.
+**Always ask which track to use — every video, no exceptions.** Use `ask_user_input_v0` with 2-4 options pulled from this table (favor ones that fit the content's tone, but present real choices, not just one). Don't auto-pick and mention it after the fact, and don't skip asking because a previous video already used a similar track — always confirm per video.
 
 **Note**: a `creative-technology-showreel-241274.mp3` upload came through corrupted (2 bytes) and was removed from the repo — if that track is wanted, it needs re-uploading.
 
