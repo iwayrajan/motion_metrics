@@ -4,9 +4,11 @@ import { TipsCarousel, getTipsCarouselDuration } from "./compositions/TipsCarous
 import { ShowcaseCard, getShowcaseCardDuration } from "./compositions/ShowcaseCard";
 import { PopulationChart } from "./compositions/PopulationChart";
 import { BtcJunePrices } from "./compositions/BtcJunePrices";
+import { EthJunePrices } from "./compositions/EthJunePrices";
 import { tipsMistakes } from "./content/tips-mistakes";
 import { DURATION as POPULATION_DURATION } from "./compositions/population/config";
 import { DURATION as BTC_DURATION } from "./compositions/btc-june/config";
+import { DURATION as ETH_DURATION } from "./compositions/eth-june/config";
 
 const FPS = 30;
 const WIDTH = 1080;
@@ -45,6 +47,16 @@ export const RemotionRoot: React.FC = () => {
         id="btc-june-prices"
         component={BtcJunePrices}
         durationInFrames={BTC_DURATION}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+
+      {/* Mobile-profile test — punchier type/motion per references/mobile-vs-desktop.md */}
+      <Composition
+        id="eth-june-prices"
+        component={EthJunePrices}
+        durationInFrames={ETH_DURATION}
         fps={30}
         width={1080}
         height={1920}

@@ -38,5 +38,20 @@ Applies to: donut segment draws, bar-chart-race era transitions, any multi-part 
 ```
 The first approach (extend the real Sequence, don't cap it early) is simpler and is what every chart-types.md template assumes — **the closing beat is an overlay on top of the finished chart, not a replacement for it.** When scaffolding a new chart type, explicitly check: does the primary visual's Sequence duration reach all the way to the video's final frame (directly, or via "no durationInFrames" = default to parent length)? If not, that's this bug waiting to happen.
 
-## Process note
-Both bugs were caught by the person watching the actual render, not by `remotion compositions` (which only checks bundling, not runtime timing/mounting). This is why the Verification step in the main SKILL.md says to extract and view frames near every Sequence boundary, not just spot-check the middle — boundary frames are exactly where these bugs live.
+## 3. Callout/label text clipped at the canvas edge for first/last data points
+**What happened**: a "today" callout on the last data point (rightmost, `x = CHART_RIGHT`) was centered on that point with a fixed-width box (`left: x - 160, width: 320`). For a point sitting at the right edge of the chart, that centered box extended 60px past the canvas's right edge, clipping the text. The same math would clip the first point's label off the left edge too — it just happened not to occur there because the actual label text was empty/short in that case.
+
+**The fix, generalized**: never center a label on `x` unconditionally when `x` can be near an edge (first or last data point, outermost bubble, etc.). Clamp the label's horizontal position to stay within the canvas margins:
+```ts
+const LABEL_WIDTH = 320;
+const CANVAS_MARGIN = 24; // minimum gap from the true edge
+
+const rawLeft = x - LABEL_WIDTH / 2;
+const clampedLeft = Math.max(
+  CANVAS_MARGIN,
+  Math.min(rawLeft, CANVAS_WIDTH - LABEL_WIDTH - CANVAS_MARGIN)
+);
+```
+Applies to: any callout, tooltip, or annotation positioned relative to a data point in a line/bar/scatter chart — check this whenever the point can land within roughly half a label-width of either edge, not just for points that happen to be exactly at the edge (a point at 90% of chart width with a wide label can clip just as easily as one at 100%).
+
+**Process note**: this is exactly the kind of bug the Verification step's frame extraction should catch — but only if the check actually looks at the frames where edge-adjacent callouts are visible, not just Sequence-boundary frames (bug #1/#2 territory) or the midpoint. When a chart has an annotation tied to the first or last data point specifically, extract and view a frame where that annotation is on screen as a matter of course.
