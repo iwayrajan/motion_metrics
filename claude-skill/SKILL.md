@@ -57,7 +57,7 @@ User skills (`/mnt/skills/user/`) are sandbox-local and don't reliably carry acr
 3. **Get real data before building anything financial or factual.** See "Data integrity" below — this is the single most common way these videos go wrong.
 4. **Always ask which audio track to use, every video** — present options from `references/audio.md`'s catalog via `ask_user_input_v0`, don't auto-pick. This is a standing preference, not a one-off.
 5. **Scaffold**: config constants (timing/layout), a data file, one component per visual element, a main composition file that assembles them with `<Sequence>`, register in `Root.tsx`.
-6. **Render and actually look at it** before handing it over — see Verification below. Don't ship a render you haven't visually checked.
+6. **Render and hand it over** — see Verification below for the current (lightweight) default. Don't add token-costly checks the person didn't ask for.
 
 ## Decision table — which chart type for which content
 
@@ -98,14 +98,22 @@ Every example in `references/chart-types.md` embeds hardcoded numbers for illust
 
 `assets/components/` has copy-ready `.tsx` for pieces every video needs: `TitleCard`, `StatCards`, `SourceLine`, `DriftParticles`, `springs.ts` (config presets), plus the vertical-shorts `Bokeh`/`CornerOrnament`/`DrawnDivider` set built for the BiodataBuilder brand (restyle colors for other brands). Copy the ones you need into the project's `src/components/` rather than reinventing them each time.
 
-## Verification (do this before presenting the file)
+## Verification (default: skip it — the person checks manually)
+
+**Default policy, per explicit instruction: do not extract/view frames automatically.** This was previously a mandatory multi-frame check, but it burns significant tokens (every viewed image costs real tokens) for something the person already does themselves after every render. Current default:
 
 ```bash
-npx remotion compositions src/index.ts        # confirms it bundles with no errors
+npx remotion compositions src/index.ts        # keep this — cheap (text output, no images), catches real bundling errors before a wasted render
 npx remotion render src/index.ts <id> out/x.mp4
-ffmpeg -y -i out/x.mp4 -vf "select='eq(n,15)+eq(n,200)+eq(n,450)+eq(n,700)+eq(n,850)'" -vsync 0 /tmp/frames/f%02d.png
 ```
-Then `view` each extracted frame — check text isn't clipped/overlapping, colors read correctly, and animations landed where expected. **Specifically extract frames right at and just after every `<Sequence>` boundary** (transitions between years/stages/segments, and the start of the closing hold) — this is where the two bugs in `references/pitfalls.md` actually surfaced, and a mid-segment spot check won't catch them. Fix and re-render before calling `present_files`.
+Then hand the file to `present_files` directly. **Do not** run `ffmpeg` frame extraction or `view` any frames unless one of these applies:
+- The person explicitly asks for a visual check on this specific video
+- Something about the render command itself errored or looked wrong (not "might have a bug" — an actual signal)
+- It's worth a quick 1-2 frame gut-check when trying a genuinely novel pattern for the first time (not a repeat of an established chart type) — even then, default to 1 frame, not the 5-10 used previously
+
+Rendering itself (the Chrome-headless encode time) is real compute time that doesn't shrink with fewer tokens — only the verification loop does. Don't try to "speed up" a render by reducing video length/quality unless asked; that's a different tradeoff the person hasn't requested.
+
+When something *does* turn out broken (the person will tell you after watching it, as has happened before — see `references/pitfalls.md`), fix the code, verify it bundles with `remotion compositions`, and ask whether to re-render or just commit the unrendered fix — don't assume a re-render is wanted.
 
 ## Reference files
 
