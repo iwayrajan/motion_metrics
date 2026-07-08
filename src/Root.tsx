@@ -5,10 +5,13 @@ import { ShowcaseCard, getShowcaseCardDuration } from "./compositions/ShowcaseCa
 import { PopulationChart } from "./compositions/PopulationChart";
 import { BtcJunePrices } from "./compositions/BtcJunePrices";
 import { EthJunePrices } from "./compositions/EthJunePrices";
+import { AICompanyCountdown } from "./compositions/AICompanyCountdown";
 import { tipsMistakes } from "./content/tips-mistakes";
+import { showcaseDefault } from "./content/showcase-default";
 import { DURATION as POPULATION_DURATION } from "./compositions/population/config";
 import { DURATION as BTC_DURATION } from "./compositions/btc-june/config";
 import { DURATION as ETH_DURATION } from "./compositions/eth-june/config";
+import { DURATION as AI_COUNTDOWN_DURATION } from "./compositions/ai-countdown/config";
 
 const FPS = 30;
 const WIDTH = 1080;
@@ -60,6 +63,29 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+
+      <Composition
+        id="ai-company-countdown"
+        component={AICompanyCountdown}
+        durationInFrames={AI_COUNTDOWN_DURATION}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+
+      {/* Studio template #1 — duration computed from submitted content at render time,
+          since the studio form's callout count varies per submission. */}
+      <Composition
+        id="showcase-card"
+        component={ShowcaseCard}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ content: showcaseDefault }}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: getShowcaseCardDuration(props.content.callouts.length),
+        })}
       />
     </>
   );

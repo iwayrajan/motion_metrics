@@ -120,6 +120,7 @@ When something *does* turn out broken (the person will tell you after watching i
 - `references/chart-types.md` — full parameter spec (layout, colors, timing) for all 8 chart types, restructured as tables for quick lookup
 - `references/animation-techniques.md` — 8 motion/rendering techniques (spring bounce, line/area tracing, odometer counters, idle bob, liquid-fill rings, HUD callouts, race-overtake flash, treemap zoom) to mix into whichever chart type is chosen — use this alongside chart-types.md when building the options menu in step 2 of the workflow
 - `references/audio.md` — how to source, place, and wire in background audio; includes a catalog of tracks already in this repo's `public/audio/`
+- `references/studio-architecture.md` — the config-driven web-app alternative to the chat workflow (pick a template, fill a form, render — no LLM per video). Read this before touching anything in `studio/`
 - `references/mobile-vs-desktop.md` — **read before building any vertical short** — mobile needs a distinctly punchier design language (bigger type, bouncier motion, faster stagger, safe zones) than the landscape explainers, not the same style scaled down
 - `references/pitfalls.md` — real bugs hit in past builds (Sequence timing cutting off staged animations, primary chart unmounting before the closing hold) and their generalized fixes — check against this before finalizing timing on any new multi-stage composition
 - `references/environment-setup.md` — new-project scaffold checklist (package.json, tsconfig, folder structure)
