@@ -6,8 +6,10 @@ import { PopulationChart } from "./compositions/PopulationChart";
 import { BtcJunePrices } from "./compositions/BtcJunePrices";
 import { EthJunePrices } from "./compositions/EthJunePrices";
 import { AICompanyCountdown } from "./compositions/AICompanyCountdown";
+import { PriceChart, getPriceChartDuration } from "./compositions/PriceChart";
 import { tipsMistakes } from "./content/tips-mistakes";
 import { showcaseDefault } from "./content/showcase-default";
+import { priceChartDefault } from "./content/price-chart-default";
 import { DURATION as POPULATION_DURATION } from "./compositions/population/config";
 import { DURATION as BTC_DURATION } from "./compositions/btc-june/config";
 import { DURATION as ETH_DURATION } from "./compositions/eth-june/config";
@@ -85,6 +87,19 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{ content: showcaseDefault }}
         calculateMetadata={({ props }) => ({
           durationInFrames: getShowcaseCardDuration(props.content.callouts.length),
+        })}
+      />
+
+      {/* Studio template #2 — generalized price-over-time chart, any asset/dataset. */}
+      <Composition
+        id="price-chart"
+        component={PriceChart}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ content: priceChartDefault }}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: getPriceChartDuration(props.content),
         })}
       />
     </>

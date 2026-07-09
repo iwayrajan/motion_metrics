@@ -4,7 +4,7 @@
 // underlying Remotion composition/calculateMetadata registration in ../../src/Root.tsx)
 // — not building a new form from scratch.
 
-export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList";
+export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList" | "pointList" | "pointCalloutList";
 
 export type TemplateField = {
   key: string;
@@ -47,6 +47,23 @@ export const templates: TemplateSchema[] = [
       { key: "imageFile", label: "Image", type: "image" },
       { key: "callouts", label: "Callouts (feature + position)", type: "calloutList", maxItems: 5 },
       { key: "cta", label: "Call to action", type: "text", placeholder: "e.g. Try it free at yoursite.com" },
+      { key: "musicFile", label: "Background music", type: "audio" },
+    ],
+  },
+  {
+    id: "price-chart",
+    name: "Price / Value Over Time",
+    description: "A glowing line chart for any metric over time — price history, growth, rankings by value. Ends on a hero number for the latest point.",
+    aspectRatio: "9:16",
+    fields: [
+      { key: "title", label: "Title", type: "text", placeholder: "e.g. BTC Price Every June" },
+      { key: "subtitle", label: "Subtitle", type: "text", placeholder: "e.g. 2021-2026" },
+      { key: "unitPrefix", label: "Unit prefix (e.g. $)", type: "text", placeholder: "$" },
+      { key: "points", label: "Data points (label + value)", type: "pointList", maxItems: 8 },
+      { key: "callouts", label: "Callouts (which point + text)", type: "pointCalloutList", maxItems: 3 },
+      { key: "heroLabel", label: "Hero label (e.g. \"Today\")", type: "text", placeholder: "Today" },
+      { key: "accentColor", label: "Accent color (hex)", type: "text", placeholder: "#00E5FF" },
+      { key: "sourceText", label: "Source / disclaimer text", type: "text", placeholder: "e.g. CoinGecko, not financial advice" },
       { key: "musicFile", label: "Background music", type: "audio" },
     ],
   },

@@ -17,4 +17,18 @@ export type ShowcaseCardContent = {
   musicFile?: string;
 };
 
-export type VideoContent = TipsCarouselContent | ShowcaseCardContent;
+export type PriceChartContent = {
+  type: "PriceChart";
+  id: string;
+  title: string;
+  subtitle: string;
+  unitPrefix?: string; // e.g. "$" — shown before every number
+  points: { label: string; value: number }[]; // x-axis label (e.g. a year) + y value
+  callouts?: { pointIndex: number; label: string; color?: string }[]; // up to ~3, edge-clamped per pitfalls.md #3
+  heroLabel?: string; // e.g. "Today" — shown above the closing odometer of the last point
+  accentColor?: string; // line/glow color, defaults to a cyan if omitted
+  sourceText?: string; // citation shown in the closing hold
+  musicFile?: string;
+};
+
+export type VideoContent = TipsCarouselContent | ShowcaseCardContent | PriceChartContent;

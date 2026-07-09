@@ -5,18 +5,17 @@ import crypto from "crypto";
 import { bundle } from "@remotion/bundler";
 import { getCompositions, renderMedia } from "@remotion/renderer";
 
-// Path to the actual Remotion project this studio app renders from — one level up.
 const REMOTION_PROJECT_ROOT = path.join(process.cwd(), "..");
 const ENTRY_POINT = path.join(REMOTION_PROJECT_ROOT, "src", "index.ts");
 const PUBLIC_DIR = path.join(REMOTION_PROJECT_ROOT, "public");
 
 // Same sandbox-specific Chrome workaround documented in the remotion skill's
-// environment-setup.md — on a normal machine with real internet access, this can likely
-// be removed entirely (Remotion will download its own Chrome successfully).
+// environment-setup.md — on a normal machine with real internet access, Remotion should
+// download its own Chrome successfully and this whole function becomes unnecessary.
 function findCachedChrome(): string | undefined {
   const candidates = [
-    // process.env.HOME isn't reliable across every process context (observed /root here
-    // instead of the actual user's home) — check common absolute locations too, not just $HOME.
+    // process.env.HOME isn't reliable across every process context — check common
+    // absolute locations too, not just $HOME (real bug hit during first build).
     path.join(process.env.HOME || "", ".cache/puppeteer/chrome"),
     "/root/.cache/puppeteer/chrome",
     "/home/claude/.cache/puppeteer/chrome",
@@ -34,8 +33,7 @@ function findCachedChrome(): string | undefined {
   return undefined;
 }
 
-// Bundling takes a few seconds — cache it across requests in this dev server's memory
-// rather than re-bundling on every single render.
+// Bundling takes a few seconds — cache across requests in this dev server's memory.
 let cachedBundleUrl: string | null = null;
 async function getBundleUrl(): Promise<string> {
   if (cachedBundleUrl) return cachedBundleUrl;
@@ -43,44 +41,58 @@ async function getBundleUrl(): Promise<string> {
   return cachedBundleUrl;
 }
 
+async function saveUploadedImage(formData: FormData, key: string): Promise<string> {
+  const entry = formData.get(key);
+  if (!entry || typeof entry === "string") return "placeholder.jpg";
+  const uploadsDir = path.join(PUBLIC_DIR, "images", "uploads");
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  const ext = path.extname((entry as File).name) || ".jpg";
+  const filename = `${crypto.randomUUID()}${ext}`;
+  const buffer = Buffer.from(await (entry as File).arrayBuffer());
+  fs.writeFileSync(path.join(uploadsDir, filename), buffer);
+  return `uploads/${filename}`;
+}
+
+const str = (formData: FormData, key: string) => (formData.get(key) as string) || "";
+const json = (formData: FormData, key: string) => JSON.parse((formData.get(key) as string) || "[]");
+
+// Each template's content shape is built here — this is the one place a new template
+// needs a case added (see studio/README.md's "adding template #2+" walkthrough).
+async function buildContent(templateId: string, formData: FormData) {
+  if (templateId === "showcase-card") {
+    return {
+      type: "ShowcaseCard" as const,
+      id: `studio-${Date.now()}`,
+      hook: str(formData, "hook"),
+      imageFile: await saveUploadedImage(formData, "imageFile"),
+      callouts: json(formData, "callouts"),
+      cta: str(formData, "cta"),
+      musicFile: str(formData, "musicFile") || undefined,
+    };
+  }
+  if (templateId === "price-chart") {
+    return {
+      type: "PriceChart" as const,
+      id: `studio-${Date.now()}`,
+      title: str(formData, "title"),
+      subtitle: str(formData, "subtitle"),
+      unitPrefix: str(formData, "unitPrefix") || undefined,
+      points: json(formData, "points"),
+      callouts: json(formData, "callouts"),
+      heroLabel: str(formData, "heroLabel") || undefined,
+      accentColor: str(formData, "accentColor") || undefined,
+      sourceText: str(formData, "sourceText") || undefined,
+      musicFile: str(formData, "musicFile") || undefined,
+    };
+  }
+  throw new Error(`Unknown template: ${templateId}`);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const templateId = formData.get("templateId") as string;
-
-    if (templateId !== "showcase-card") {
-      return NextResponse.json({ error: `Unknown template: ${templateId}` }, { status: 400 });
-    }
-
-    const hook = (formData.get("hook") as string) || "";
-    const cta = (formData.get("cta") as string) || "";
-    const musicFile = (formData.get("musicFile") as string) || undefined;
-    const calloutsRaw = (formData.get("callouts") as string) || "[]";
-    const callouts = JSON.parse(calloutsRaw) as { text: string; top: number }[];
-
-    // Save the uploaded image into the Remotion project's actual public/ folder —
-    // staticFile() resolves relative to THAT project, not this studio app's public/.
-    const imageEntry = formData.get("image");
-    let imageFile = "placeholder.jpg";
-    if (imageEntry && typeof imageEntry !== "string") {
-      const uploadsDir = path.join(PUBLIC_DIR, "images", "uploads");
-      fs.mkdirSync(uploadsDir, { recursive: true });
-      const ext = path.extname((imageEntry as File).name) || ".jpg";
-      const filename = `${crypto.randomUUID()}${ext}`;
-      const buffer = Buffer.from(await (imageEntry as File).arrayBuffer());
-      fs.writeFileSync(path.join(uploadsDir, filename), buffer);
-      imageFile = `uploads/${filename}`;
-    }
-
-    const content = {
-      type: "ShowcaseCard" as const,
-      id: `studio-${Date.now()}`,
-      hook,
-      imageFile,
-      callouts,
-      cta,
-      musicFile,
-    };
+    const content = await buildContent(templateId, formData);
 
     const browserExecutable = findCachedChrome();
     const serveUrl = await getBundleUrl();
@@ -89,10 +101,9 @@ export async function POST(request: NextRequest) {
       browserExecutable: browserExecutable ?? undefined,
       inputProps: { content },
     });
-    const composition = compositions.find((c) => c.id === "showcase-card");
-
+    const composition = compositions.find((c) => c.id === templateId);
     if (!composition) {
-      return NextResponse.json({ error: "Composition 'showcase-card' not found" }, { status: 500 });
+      return NextResponse.json({ error: `Composition '${templateId}' not found` }, { status: 500 });
     }
 
     const outputsDir = path.join(process.cwd(), "public", "renders");

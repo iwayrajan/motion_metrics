@@ -15,10 +15,11 @@ The chat workflow (this skill's main sections) costs real tokens and time per vi
 ## Sandbox-specific gotcha already hit and fixed
 `process.env.HOME` was `/root` inside the Next.js server process, not the actual user directory where the Puppeteer Chrome cache lived — the Chrome-binary lookup silently failed and Remotion tried (and failed, network-blocked) to download its own copy. Fixed by checking multiple hardcoded absolute paths, not just `$HOME`, in `findCachedChrome()`. On the person's own laptop this specific failure mode may not occur (normal environments usually have working Chrome auto-download), but the hardened lookup function doesn't hurt and is already in place.
 
-## Status as of first build
-- **1 template wired up**: `showcase-card` (headline + image + up to 5 callouts + CTA + music picker) — chosen specifically because it needed text, an image, and audio, proving all three input types at once.
-- Verified end-to-end with a real `curl` POST to `/api/render` (not just "it compiles") — produced a real, valid 8-second mp4. Don't consider a future template "working" until it's been proven the same way, not just via `next build` succeeding.
-- 9 templates remaining, per the person's plan to scale up once the pattern's proven. When adding each: reuse an already-built-and-verified chat composition where possible (e.g. the price line graph, the bar chart race, the countdown pillar) rather than designing something new from scratch — the studio's job is packaging proven templates, not inventing new ones.
+## Status
+- **2 templates wired up**: `showcase-card` (headline + image + up to 5 callouts + CTA + music picker) and `price-chart` (title/subtitle + up to 8 data points + up to 3 callouts + hero number + music picker), generalized from the BTC/ETH price-chart compositions built in chat.
+- The gallery and form pages are **genuinely generic** now (not just in principle) — the form renders itself from `TemplateField[]` schemas via a `renderField()` switch on `field.type`, and the API route's `buildContent()` has one case per template. Adding template #3 means: one schema entry + one `buildContent()` case + the underlying composition's `calculateMetadata` registration — no UI code changes.
+- Both templates verified end-to-end with real `curl` POSTs producing valid mp4s with mathematically-correct durations (not just `next build` succeeding) — this is the bar for calling a template "done," not just "the code compiles."
+- 8 templates remaining. When adding each: reuse an already-built-and-verified chat composition where possible (e.g. the bar chart race, the countdown pillar which already exists as `AICompanyCountdown` — generalizing that is the natural next one) rather than designing something new from scratch.
 
 ## Known limitations, by design (MVP, not yet a multi-user product)
 - No render queue (BullMQ or similar) — fine for one person clicking a button occasionally, not for concurrent multi-user traffic.
