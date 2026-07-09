@@ -15,6 +15,8 @@ export default function TemplateFormPage() {
   const [status, setStatus] = useState<"idle" | "rendering" | "done" | "error">("idle");
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [jsonText, setJsonText] = useState("");
+  const [jsonMsg, setJsonMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   if (!template) {
     return <main style={{ padding: 40 }}>Unknown template: {templateId}</main>;
@@ -142,6 +144,63 @@ export default function TemplateFormPage() {
     }
   };
 
+  const applyJson = (parsed: unknown) => {
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      setJsonMsg({ type: "error", text: "JSON must be an object with field keys, e.g. { \"title\": ... }" });
+      return;
+    }
+    const obj = parsed as Record<string, unknown>;
+    const imageFields = template!.fields.filter((f) => f.type === "image").map((f) => f.key);
+    const skipped: string[] = [];
+    const next: Record<string, FieldValue> = { ...values };
+
+    for (const field of template!.fields) {
+      if (!(field.key in obj)) continue;
+      if (imageFields.includes(field.key)) {
+        skipped.push(field.key); // can't set a File from JSON — must be uploaded separately
+        continue;
+      }
+      next[field.key] = obj[field.key] as FieldValue;
+    }
+
+    setValues(next);
+    setJsonMsg({
+      type: "success",
+      text:
+        skipped.length > 0
+          ? `Loaded. Note: ${skipped.join(", ")} can't come from JSON — upload that file separately below.`
+          : "Loaded — form filled in.",
+    });
+  };
+
+  const handleLoadJsonText = () => {
+    try {
+      applyJson(JSON.parse(jsonText));
+    } catch {
+      setJsonMsg({ type: "error", text: "Couldn't parse that as JSON — check for a stray comma or missing bracket." });
+    }
+  };
+
+  const handleJsonFileUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = String(reader.result);
+        setJsonText(text);
+        applyJson(JSON.parse(text));
+      } catch {
+        setJsonMsg({ type: "error", text: "Couldn't parse that file as JSON." });
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const loadExample = () => {
+    const example = JSON.stringify(template!.exampleJson, null, 2);
+    setJsonText(example);
+    applyJson(template!.exampleJson);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("rendering");
@@ -176,6 +235,41 @@ export default function TemplateFormPage() {
     <main style={{ maxWidth: 600, margin: "0 auto", padding: "60px 24px" }}>
       <h1 style={{ fontSize: 26, fontWeight: 800 }}>{template.name}</h1>
       <p style={{ color: "#8a7fae", marginBottom: 30 }}>{template.description}</p>
+
+      <div style={{ background: "#111022", border: "1px solid #2b2440", borderRadius: 10, padding: 16, marginBottom: 24 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Import JSON</div>
+        <div style={{ fontSize: 13, color: "#8a7fae", marginBottom: 10 }}>
+          Paste JSON matching this template's fields (ask Claude for one, or write your own), upload a .json file, or load the example to see the shape.
+        </div>
+        <textarea
+          style={{ ...inputStyle, minHeight: 100, fontFamily: "monospace", fontSize: 12, marginBottom: 8 }}
+          value={jsonText}
+          onChange={(e) => setJsonText(e.target.value)}
+          placeholder={`{\n  "title": "...",\n  ...\n}`}
+        />
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button type="button" onClick={handleLoadJsonText} style={{ background: "#7C5CFC", border: "none", color: "#fff", borderRadius: 6, padding: "8px 14px", cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
+            Load JSON
+          </button>
+          <label style={{ background: "none", border: "1px solid #2b2440", color: "#8a7fae", borderRadius: 6, padding: "8px 14px", cursor: "pointer", fontSize: 13 }}>
+            Upload .json file
+            <input
+              type="file"
+              accept="application/json"
+              style={{ display: "none" }}
+              onChange={(e) => e.target.files?.[0] && handleJsonFileUpload(e.target.files[0])}
+            />
+          </label>
+          <button type="button" onClick={loadExample} style={{ background: "none", border: "1px solid #2b2440", color: "#8a7fae", borderRadius: 6, padding: "8px 14px", cursor: "pointer", fontSize: 13 }}>
+            Load example
+          </button>
+        </div>
+        {jsonMsg && (
+          <div style={{ marginTop: 10, fontSize: 13, color: jsonMsg.type === "error" ? "#ef4444" : "#22c55e" }}>
+            {jsonMsg.text}
+          </div>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit}>
         {template.fields.map((field) => (

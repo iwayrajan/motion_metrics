@@ -20,6 +20,7 @@ export type TemplateSchema = {
   description: string;
   aspectRatio: "9:16" | "16:9";
   fields: TemplateField[];
+  exampleJson: Record<string, unknown>; // shown as a "load example" convenience, and the shape Claude should hand you when generating import-ready JSON
 };
 
 // Audio catalog — kept in sync with /mnt/skills/user/remotion/references/audio.md.
@@ -49,6 +50,16 @@ export const templates: TemplateSchema[] = [
       { key: "cta", label: "Call to action", type: "text", placeholder: "e.g. Try it free at yoursite.com" },
       { key: "musicFile", label: "Background music", type: "audio" },
     ],
+    exampleJson: {
+      hook: "Introducing our new feature",
+      callouts: [
+        { text: "Fast setup", top: 30 },
+        { text: "No credit card needed", top: 60 },
+      ],
+      cta: "Try it free today",
+      musicFile: "drums-152982.mp3",
+      // note: imageFile is NOT included — JSON can't carry an actual image file, upload that separately
+    },
   },
   {
     id: "price-chart",
@@ -66,5 +77,26 @@ export const templates: TemplateSchema[] = [
       { key: "sourceText", label: "Source / disclaimer text", type: "text", placeholder: "e.g. CoinGecko, not financial advice" },
       { key: "musicFile", label: "Background music", type: "audio" },
     ],
+    exampleJson: {
+      title: "BTC Price Every June",
+      subtitle: "2021-2026",
+      unitPrefix: "$",
+      points: [
+        { label: "2021", value: 35041 },
+        { label: "2022", value: 18917 },
+        { label: "2023", value: 30447 },
+        { label: "2024", value: 62678 },
+        { label: "2025", value: 107289 },
+        { label: "2026", value: 58504 },
+      ],
+      callouts: [
+        { pointIndex: 1, label: "2022 crypto winter low", color: "#ef4444" },
+        { pointIndex: 5, label: "Today", color: "#00E5FF" },
+      ],
+      heroLabel: "Today",
+      accentColor: "#00E5FF",
+      sourceText: "StatMuse — not financial advice",
+      musicFile: "synthwave-laser-drift-251660.mp3",
+    },
   },
 ];
