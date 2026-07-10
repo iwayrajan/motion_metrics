@@ -4,7 +4,7 @@
 // underlying Remotion composition/calculateMetadata registration in ../../src/Root.tsx)
 // — not building a new form from scratch.
 
-export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList" | "pointList" | "pointCalloutList";
+export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList" | "pointList" | "pointCalloutList" | "rankedItemList";
 
 export type TemplateField = {
   key: string;
@@ -96,6 +96,36 @@ export const templates: TemplateSchema[] = [
       heroLabel: "Today",
       accentColor: "#00E5FF",
       sourceText: "StatMuse — not financial advice",
+      musicFile: "synthwave-laser-drift-251660.mp3",
+    },
+  },
+  {
+    id: "countdown",
+    name: "Ranked Countdown",
+    description: "A full-screen pillar per item, counting down from smallest to biggest — top 10 lists, rankings, leaderboards.",
+    aspectRatio: "9:16",
+    fields: [
+      { key: "title", label: "Title", type: "text", placeholder: "e.g. Top 10 AI Companies" },
+      { key: "subtitle", label: "Subtitle", type: "text", placeholder: "e.g. By Valuation \u00b7 2026" },
+      { key: "unitPrefix", label: "Unit prefix (e.g. $)", type: "text", placeholder: "$" },
+      { key: "items", label: "Items, #1 first (name, value, unit suffix, note)", type: "rankedItemList", maxItems: 10 },
+      { key: "closingText", label: "Closing text", type: "text", placeholder: "e.g. Which one hits $1T first?" },
+      { key: "sourceText", label: "Source / disclaimer text", type: "text", placeholder: "e.g. Not audited financials" },
+      { key: "musicFile", label: "Background music", type: "audio" },
+    ],
+    exampleJson: {
+      title: "Top 5 AI Companies",
+      subtitle: "By Valuation",
+      unitPrefix: "$",
+      items: [
+        { name: "xAI / SpaceX", value: 1.75, unitSuffix: "T", color: "#E5E7EB", note: "Merged entity, IPO target" },
+        { name: "Anthropic", value: 965, unitSuffix: "B", color: "#D97757", note: "Series H" },
+        { name: "OpenAI", value: 852, unitSuffix: "B", color: "#12A594", note: "Last private round" },
+        { name: "Databricks", value: 134, unitSuffix: "B", color: "#FF5F46", note: "Series L" },
+        { name: "Perplexity", value: 22.6, unitSuffix: "B", color: "#22A6B3", note: "Series E-6" },
+      ],
+      closingText: "Which one hits $1T first?",
+      sourceText: "aifundingtracker.com \u00b7 not audited financials",
       musicFile: "synthwave-laser-drift-251660.mp3",
     },
   },

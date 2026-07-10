@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 import { bundle } from "@remotion/bundler";
-import { getCompositions, renderMedia } from "@remotion/renderer";
+import { selectComposition, renderMedia } from "@remotion/renderer";
 
 const REMOTION_PROJECT_ROOT = path.join(process.cwd(), "..");
 const ENTRY_POINT = path.join(REMOTION_PROJECT_ROOT, "src", "index.ts");
@@ -85,6 +85,19 @@ async function buildContent(templateId: string, formData: FormData) {
       musicFile: str(formData, "musicFile") || undefined,
     };
   }
+  if (templateId === "countdown") {
+    return {
+      type: "Countdown" as const,
+      id: `studio-${Date.now()}`,
+      title: str(formData, "title"),
+      subtitle: str(formData, "subtitle"),
+      unitPrefix: str(formData, "unitPrefix") || undefined,
+      items: json(formData, "items"),
+      closingText: str(formData, "closingText") || undefined,
+      sourceText: str(formData, "sourceText") || undefined,
+      musicFile: str(formData, "musicFile") || undefined,
+    };
+  }
   throw new Error(`Unknown template: ${templateId}`);
 }
 
@@ -97,14 +110,16 @@ export async function POST(request: NextRequest) {
     const browserExecutable = findCachedChrome();
     const serveUrl = await getBundleUrl();
 
-    const compositions = await getCompositions(serveUrl, {
+    // selectComposition (not getCompositions) — critical: getCompositions evaluates
+    // EVERY registered composition's calculateMetadata with these same inputProps, and
+    // other templates' metadata functions throw on a mismatched content shape (real bug
+    // hit and fixed here — see references/pitfalls.md if this gets added there).
+    const composition = await selectComposition({
+      serveUrl,
+      id: templateId,
       browserExecutable: browserExecutable ?? undefined,
       inputProps: { content },
     });
-    const composition = compositions.find((c) => c.id === templateId);
-    if (!composition) {
-      return NextResponse.json({ error: `Composition '${templateId}' not found` }, { status: 500 });
-    }
 
     const outputsDir = path.join(process.cwd(), "public", "renders");
     fs.mkdirSync(outputsDir, { recursive: true });

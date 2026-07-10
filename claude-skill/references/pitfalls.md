@@ -54,4 +54,18 @@ const clampedLeft = Math.max(
 ```
 Applies to: any callout, tooltip, or annotation positioned relative to a data point in a line/bar/scatter chart — check this whenever the point can land within roughly half a label-width of either edge, not just for points that happen to be exactly at the edge (a point at 90% of chart width with a wide label can clip just as easily as one at 100%).
 
-**Process note**: automated frame verification is **not** the default anymore (the person checks renders manually to save tokens/time — see the Verification section of the main SKILL.md). That means these bugs will now surface via the person watching the actual render and reporting back, not via an automated check catching them first. When that happens: fix the root cause, generalize the lesson into this file (as has been done for all three bugs above), and don't assume a re-render is wanted — ask.
+## 4. `getCompositions()` in the studio evaluates EVERY template's `calculateMetadata`, not just the one requested
+**What happened**: the render API used `getCompositions(serveUrl, {inputProps}).find(c => c.id === templateId)` to fetch metadata for the requested composition. `getCompositions` evaluates `calculateMetadata` for **every** `<Composition>` registered in `Root.tsx`, using the same `inputProps` for all of them — so submitting Countdown-shaped content crashed with `Cannot read properties of undefined (reading 'length')` because `price-chart`'s `calculateMetadata` tried to read `props.content.points` (which doesn't exist on Countdown content) before the code ever got to the Countdown composition it actually wanted.
+
+**The fix, generalized**: use `selectComposition({serveUrl, id, inputProps, browserExecutable})` from `@remotion/renderer` instead — it resolves metadata for **only** the requested composition id, never touching the others. This is the correct API for "I want composition X with these props," full stop; `getCompositions` is for listing/inspecting everything, not for a targeted render.
+```ts
+// WRONG in a multi-template studio — evaluates calculateMetadata for every registered composition
+const compositions = await getCompositions(serveUrl, { inputProps });
+const composition = compositions.find((c) => c.id === templateId);
+
+// RIGHT — only touches the one composition being rendered
+const composition = await selectComposition({ serveUrl, id: templateId, inputProps, browserExecutable });
+```
+This only bites once a studio has 2+ templates with `calculateMetadata` functions expecting different content shapes — invisible with just one template, which is exactly why it wasn't caught building `showcase-card` or `price-chart` alone, only once `countdown` was added as a third, differently-shaped template.
+
+**Process note**: automated frame verification is **not** the default anymore (the person checks renders manually to save tokens/time — see the Verification section of the main SKILL.md). That means these bugs will now surface via the person watching the actual render and reporting back, not via an automated check catching them first. When that happens: fix the root cause, generalize the lesson into this file (as has been done for all four bugs above), and don't assume a re-render is wanted — ask.
