@@ -225,8 +225,30 @@ const Outro: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
+const BulletsList: React.FC<{ bullets: string[]; bulletsDuration: number }> = ({ bullets, bulletsDuration }) => {
+  const frame = useCurrentFrame();
+  // fade out over the last 15 frames before this Sequence unmounts, so the CTA doesn't
+  // pop in on top of still-visible bullets (previously this had no duration cap at all —
+  // bullets stayed mounted for the rest of the video, overlapping the CTA underneath it)
+  const opacity = interpolate(frame, [bulletsDuration - 15, bulletsDuration], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  return (
+    <AbsoluteFill style={{ justifyContent: "center", alignItems: "flex-start", padding: "0 100px", opacity }}>
+      {bullets.map((bullet, i) => (
+        <Sequence key={i} from={i * BULLET_GAP} layout="none">
+          <BulletRow text={bullet} index={i} />
+        </Sequence>
+      ))}
+    </AbsoluteFill>
+  );
+};
+
 export const TipsCarousel: React.FC<{ content: TipsCarouselContent }> = ({ content }) => {
   const bulletsStart = HOOK_DURATION;
+  const bulletsDuration = content.bullets.length * BULLET_GAP;
 
   return (
     <AbsoluteFill>
@@ -238,42 +260,15 @@ export const TipsCarousel: React.FC<{ content: TipsCarouselContent }> = ({ conte
         <Audio src={staticFile(`audio/${content.musicFile}`)} volume={0.4} />
       ) : null}
 
-      <AbsoluteFill style={{ padding: 44 }}>
-        <div
-          style={{
-            fontFamily: theme.fonts.accent,
-            fontStyle: "italic",
-            fontSize: 24,
-            fontWeight: 500,
-            color: theme.colors.gold,
-            letterSpacing: 1,
-          }}
-        >
-          {theme.brand.name}
-        </div>
-      </AbsoluteFill>
-
       <Sequence durationInFrames={HOOK_DURATION}>
         <Hook text={content.hook} />
       </Sequence>
 
-      <Sequence from={bulletsStart}>
-        <AbsoluteFill
-          style={{
-            justifyContent: "center",
-            alignItems: "flex-start",
-            padding: "0 100px",
-          }}
-        >
-          {content.bullets.map((bullet, i) => (
-            <Sequence key={i} from={i * BULLET_GAP} layout="none">
-              <BulletRow text={bullet} index={i} />
-            </Sequence>
-          ))}
-        </AbsoluteFill>
+      <Sequence from={bulletsStart} durationInFrames={bulletsDuration}>
+        <BulletsList bullets={content.bullets} bulletsDuration={bulletsDuration} />
       </Sequence>
 
-      <Sequence from={bulletsStart + content.bullets.length * BULLET_GAP}>
+      <Sequence from={bulletsStart + bulletsDuration}>
         <Outro text={content.cta} />
       </Sequence>
     </AbsoluteFill>
