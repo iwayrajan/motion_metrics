@@ -192,18 +192,6 @@ const Outro: React.FC<{ text: string }> = ({ text }) => {
         />
         <div
           style={{
-            fontFamily: theme.fonts.accent,
-            fontStyle: "italic",
-            fontSize: 24,
-            color: theme.colors.ivoryMuted,
-            letterSpacing: 2,
-            marginBottom: 14,
-          }}
-        >
-          Free • No Signup
-        </div>
-        <div
-          style={{
             position: "relative",
             fontFamily: theme.fonts.display,
             fontSize: 44,
