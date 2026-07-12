@@ -16,11 +16,10 @@ The chat workflow (this skill's main sections) costs real tokens and time per vi
 `process.env.HOME` was `/root` inside the Next.js server process, not the actual user directory where the Puppeteer Chrome cache lived — the Chrome-binary lookup silently failed and Remotion tried (and failed, network-blocked) to download its own copy. Fixed by checking multiple hardcoded absolute paths, not just `$HOME`, in `findCachedChrome()`. On the person's own laptop this specific failure mode may not occur (normal environments usually have working Chrome auto-download), but the hardened lookup function doesn't hurt and is already in place.
 
 ## Status
-- **3 templates wired up**: `showcase-card`, `price-chart`, and `countdown` (ranked pillar reveal — generalized from the AI-companies-by-valuation one-off, log10-scaled pillar heights, `#1`-first entry order reversed internally for the build-up).
-- Hit and fixed a real cross-template bug adding #3 — see `references/pitfalls.md` #4: `getCompositions()` evaluates every registered composition's `calculateMetadata` with the same inputProps, which crashes once templates have different content shapes. Fixed by switching to `selectComposition()`. This class of bug is invisible with 1-2 templates and only appears once a third, differently-shaped one is added — worth remembering if templates #4+ start throwing metadata errors that didn't happen before.
-- All three verified end-to-end with real `curl` POSTs (including a full regression pass on all three together after the `selectComposition` fix, to confirm it didn't break the two already-working templates).
-- Form/API remain genuinely schema-driven — template #3 needed one new field type (`rankedItemList`) added to the form's `renderField()` switch, one schema entry, one `buildContent()` case. No changes to the gallery page or the JSON-import feature.
-- 7 templates remaining.
+- **4 templates wired up**: `showcase-card`, `price-chart`, `countdown`, and `tips-carousel` (the original BiodataBuilder vertical shorts — hook + bullets + CTA, no image needed). `tips-carousel` was the fastest addition so far since the composition already accepted a `content` prop from day one — only needed `calculateMetadata` registration + a schema entry + a `buildContent` case, no composition rewrite.
+- Confirmed the "reuse an already-built composition" strategy (from this file's own guidance) pays off in proportion to how parameterized the source composition already was — `tips-carousel` took a fraction of the time `price-chart`/`countdown` did precisely because it needed zero generalization work.
+- All four regression-tested together via curl after adding #4.
+- 6 templates remaining.
 
 ## Known limitations, by design (MVP, not yet a multi-user product)
 - No render queue (BullMQ or similar) — fine for one person clicking a button occasionally, not for concurrent multi-user traffic.

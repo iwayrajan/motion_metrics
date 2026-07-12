@@ -98,6 +98,17 @@ async function buildContent(templateId: string, formData: FormData) {
       musicFile: str(formData, "musicFile") || undefined,
     };
   }
+  if (templateId === "tips-carousel") {
+    const bulletsRaw = str(formData, "bullets");
+    return {
+      type: "TipsCarousel" as const,
+      id: `studio-${Date.now()}`,
+      hook: str(formData, "hook"),
+      bullets: bulletsRaw.split("\n").map((b) => b.trim()).filter((b) => b.length > 0),
+      cta: str(formData, "cta"),
+      musicFile: str(formData, "musicFile") || undefined,
+    };
+  }
   throw new Error(`Unknown template: ${templateId}`);
 }
 

@@ -129,4 +129,28 @@ export const templates: TemplateSchema[] = [
       musicFile: "synthwave-laser-drift-251660.mp3",
     },
   },
+  {
+    id: "tips-carousel",
+    name: "Tips Carousel",
+    description: "A hook line, then bullet points revealing one at a time, then a call to action. No image needed — good for brand tips/mistakes-to-avoid content.",
+    aspectRatio: "9:16",
+    fields: [
+      { key: "hook", label: "Hook (opening line)", type: "text", placeholder: "e.g. 5 Mistakes to Avoid" },
+      { key: "bullets", label: "Bullets (one per line)", type: "textarea", placeholder: "One bullet per line, 3-5 works best" },
+      { key: "cta", label: "Call to action", type: "text", placeholder: "e.g. Make yours free at yoursite.com" },
+      { key: "musicFile", label: "Background music", type: "audio" },
+    ],
+    exampleJson: {
+      hook: "5 Mistakes to Avoid\nIn Your Marriage Biodata",
+      bullets: [
+        "Using a blurry or casual photo",
+        "Writing your bio-data like a resume",
+        "Skipping family background details",
+        "One template for every relative to forward",
+        "No PDF — sending an editable Word file",
+      ].join("\n"),
+      cta: "Make yours free at BiodataBuilder.in",
+      musicFile: "emotional-inspiring-piano-amp-violin-150030.mp3",
+    },
+  },
 ];

@@ -117,6 +117,20 @@ export const RemotionRoot: React.FC = () => {
           durationInFrames: getCountdownDuration(props.content),
         })}
       />
+      {/* Studio template #4 — the original vertical brand shorts, wired for the studio.
+          Already accepted a content prop from day one, so this is just registration —
+          no composition rewrite needed. */}
+      <Composition
+        id="tips-carousel"
+        component={TipsCarousel}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ content: tipsMistakes }}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: getTipsCarouselDuration(props.content.bullets.length),
+        })}
+      />
     </>
   );
 };
