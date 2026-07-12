@@ -266,7 +266,7 @@ export const TipsCarousel: React.FC<{ content: TipsCarouselContent }> = ({ conte
           }}
         >
           {content.bullets.map((bullet, i) => (
-            <Sequence key={i} from={i * BULLET_GAP}>
+            <Sequence key={i} from={i * BULLET_GAP} layout="none">
               <BulletRow text={bullet} index={i} />
             </Sequence>
           ))}
