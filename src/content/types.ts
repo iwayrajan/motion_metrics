@@ -65,4 +65,20 @@ export type DonutChartContent = {
   musicFile?: string;
 };
 
-export type VideoContent = TipsCarouselContent | ShowcaseCardContent | PriceChartContent | CountdownContent | DonutChartContent;
+export type BarRaceEra = {
+  label: string; // e.g. a year: "2020"
+  values: { name: string; value: number }[]; // same item names should appear in every era
+};
+
+export type BarChartRaceContent = {
+  type: "BarChartRace";
+  id: string;
+  title: string;
+  subtitle: string;
+  unitPrefix?: string;
+  eras: BarRaceEra[]; // 3-5 ideal — each era's item roster should match (same names, different values)
+  sourceText?: string;
+  musicFile?: string;
+};
+
+export type VideoContent = TipsCarouselContent | ShowcaseCardContent | PriceChartContent | CountdownContent | DonutChartContent | BarChartRaceContent;

@@ -9,11 +9,13 @@ import { AICompanyCountdown } from "./compositions/AICompanyCountdown";
 import { PriceChart, getPriceChartDuration } from "./compositions/PriceChart";
 import { Countdown, getCountdownDuration } from "./compositions/Countdown";
 import { DonutChart, getDonutChartDuration } from "./compositions/DonutChart";
+import { BarChartRace, getBarChartRaceDuration } from "./compositions/BarChartRace";
 import { tipsMistakes } from "./content/tips-mistakes";
 import { showcaseDefault } from "./content/showcase-default";
 import { priceChartDefault } from "./content/price-chart-default";
 import { countdownDefault } from "./content/countdown-default";
 import { donutDefault } from "./content/donut-default";
+import { barRaceDefault } from "./content/bar-race-default";
 import { DURATION as POPULATION_DURATION } from "./compositions/population/config";
 import { DURATION as BTC_DURATION } from "./compositions/btc-june/config";
 import { DURATION as ETH_DURATION } from "./compositions/eth-june/config";
@@ -144,6 +146,19 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{ content: donutDefault }}
         calculateMetadata={({ props }) => ({
           durationInFrames: getDonutChartDuration(props.content),
+        })}
+      />
+
+      {/* Studio template #6 — bar chart race. */}
+      <Composition
+        id="bar-chart-race"
+        component={BarChartRace}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ content: barRaceDefault }}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: getBarChartRaceDuration(props.content),
         })}
       />
     </>

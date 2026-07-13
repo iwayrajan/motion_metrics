@@ -4,7 +4,7 @@
 // underlying Remotion composition/calculateMetadata registration in ../../src/Root.tsx)
 // — not building a new form from scratch.
 
-export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList" | "pointList" | "pointCalloutList" | "rankedItemList" | "segmentList";
+export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList" | "pointList" | "pointCalloutList" | "rankedItemList" | "segmentList" | "eraList";
 
 export type TemplateField = {
   key: string;
@@ -179,6 +179,33 @@ export const templates: TemplateSchema[] = [
       closingStat: "$2.4M Budget",
       sourceText: "Internal data — Q2 2026",
       musicFile: "in-slow-motion-inspiring-ambient-lounge-219592.mp3",
+    },
+  },
+  {
+    id: "bar-chart-race",
+    name: "Bar Chart Race",
+    description: "Bars resize and reorder across eras — a ranking that changes over time (market cap over years, etc). Same item roster in every era, values change.",
+    aspectRatio: "9:16",
+    fields: [
+      { key: "title", label: "Title", type: "text", placeholder: "e.g. Top Cryptos by Market Cap" },
+      { key: "subtitle", label: "Subtitle", type: "text", placeholder: "e.g. 2020 vs 2025" },
+      { key: "unitPrefix", label: "Unit prefix (e.g. $)", type: "text", placeholder: "$" },
+      { key: "roster", label: "Item names, comma-separated (same order used below)", type: "text", placeholder: "Bitcoin, Ethereum, Solana" },
+      { key: "eras", label: "Eras: label + values (comma-separated, matching roster order)", type: "eraList", maxItems: 5 },
+      { key: "sourceText", label: "Source / disclaimer text", type: "text", placeholder: "e.g. CoinGecko, not financial advice" },
+      { key: "musicFile", label: "Background music", type: "audio" },
+    ],
+    exampleJson: {
+      title: "Top Cryptos by Market Cap",
+      subtitle: "2020 vs 2025",
+      unitPrefix: "$",
+      roster: "Bitcoin, Ethereum, Solana",
+      eras: [
+        { label: "2020", valuesCSV: "130, 15, 0.06" },
+        { label: "2025", valuesCSV: "2100, 300, 85" },
+      ],
+      sourceText: "Illustrative figures in $B market cap — verify against a live source before publishing",
+      musicFile: "synthwave-laser-drift-251660.mp3",
     },
   },
 ];

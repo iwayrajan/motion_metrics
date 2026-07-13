@@ -122,6 +122,27 @@ async function buildContent(templateId: string, formData: FormData) {
       musicFile: str(formData, "musicFile") || undefined,
     };
   }
+  if (templateId === "bar-chart-race") {
+    const roster = str(formData, "roster").split(",").map((n) => n.trim()).filter((n) => n.length > 0);
+    const rawEras = json(formData, "eras") as { label: string; valuesCSV: string }[];
+    const eras = rawEras.map((e) => {
+      const values = e.valuesCSV.split(",").map((v) => parseFloat(v.trim()) || 0);
+      return {
+        label: e.label,
+        values: roster.map((name, i) => ({ name, value: values[i] ?? 0 })),
+      };
+    });
+    return {
+      type: "BarChartRace" as const,
+      id: `studio-${Date.now()}`,
+      title: str(formData, "title"),
+      subtitle: str(formData, "subtitle"),
+      unitPrefix: str(formData, "unitPrefix") || undefined,
+      eras,
+      sourceText: str(formData, "sourceText") || undefined,
+      musicFile: str(formData, "musicFile") || undefined,
+    };
+  }
   throw new Error(`Unknown template: ${templateId}`);
 }
 

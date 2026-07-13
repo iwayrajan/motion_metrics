@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { templates, audioCatalog, TemplateField } from "@/lib/templates";
 
-type FieldValue = string | File | null | { text?: string; top?: number; label?: string; value?: number; pointIndex?: number; color?: string; name?: string; unitSuffix?: string; note?: string; share?: number }[];
+type FieldValue = string | File | null | { text?: string; top?: number; label?: string; value?: number; pointIndex?: number; color?: string; name?: string; unitSuffix?: string; note?: string; share?: number; valuesCSV?: string }[];
 
 export default function TemplateFormPage() {
   const params = useParams();
@@ -175,6 +175,21 @@ export default function TemplateFormPage() {
           </>
         );
       }
+      case "eraList": {
+        const list = getList(field.key);
+        return (
+          <>
+            {list.map((row: any, i: number) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                <input style={{ ...inputStyle, marginBottom: 0, width: 100 }} value={row.label || ""} onChange={(e) => updateListItem(field.key, i, "label", e.target.value)} placeholder="Era (e.g. 2020)" />
+                <input style={{ ...inputStyle, marginBottom: 0, flex: 1 }} value={row.valuesCSV || ""} onChange={(e) => updateListItem(field.key, i, "valuesCSV", e.target.value)} placeholder="Values, comma-separated, matching roster order" />
+                <button type="button" onClick={() => removeListItem(field.key, i)} style={{ background: "none", border: "none", color: "#8a7fae", cursor: "pointer" }}>✕</button>
+              </div>
+            ))}
+            <button type="button" onClick={() => addListItem(field.key, { label: "", valuesCSV: "" }, field.maxItems)} style={{ marginBottom: 16, background: "none", border: "1px solid #2b2440", color: "#8a7fae", borderRadius: 8, padding: "6px 12px", cursor: "pointer" }}>+ Add era</button>
+          </>
+        );
+      }
       default:
         return null;
     }
@@ -248,7 +263,7 @@ export default function TemplateFormPage() {
       const v = values[field.key];
       if (field.type === "image") {
         if (v instanceof File) formData.set(field.key, v);
-      } else if (field.type === "calloutList" || field.type === "pointList" || field.type === "pointCalloutList" || field.type === "rankedItemList" || field.type === "segmentList") {
+      } else if (field.type === "calloutList" || field.type === "pointList" || field.type === "pointCalloutList" || field.type === "rankedItemList" || field.type === "segmentList" || field.type === "eraList") {
         formData.set(field.key, JSON.stringify(v || []));
       } else {
         formData.set(field.key, (v as string) || "");
