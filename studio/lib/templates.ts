@@ -4,7 +4,7 @@
 // underlying Remotion composition/calculateMetadata registration in ../../src/Root.tsx)
 // — not building a new form from scratch.
 
-export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList" | "pointList" | "pointCalloutList" | "rankedItemList";
+export type FieldType = "text" | "textarea" | "image" | "audio" | "calloutList" | "pointList" | "pointCalloutList" | "rankedItemList" | "segmentList";
 
 export type TemplateField = {
   key: string;
@@ -151,6 +151,34 @@ export const templates: TemplateSchema[] = [
       ].join("\n"),
       cta: "Make yours free at BiodataBuilder.in",
       musicFile: "emotional-inspiring-piano-amp-violin-150030.mp3",
+    },
+  },
+  {
+    id: "donut-chart",
+    name: "Donut / Allocation Chart",
+    description: "A segmented ring drawing in clockwise, with a legend — market share, portfolio allocation, budget breakdown.",
+    aspectRatio: "9:16",
+    fields: [
+      { key: "title", label: "Title", type: "text", placeholder: "e.g. Where Our Budget Goes" },
+      { key: "subtitle", label: "Subtitle", type: "text", placeholder: "e.g. 2026 Breakdown" },
+      { key: "segments", label: "Segments (name + share % + color)", type: "segmentList", maxItems: 7 },
+      { key: "centerLabel", label: "Center label while drawing", type: "text", placeholder: "Total" },
+      { key: "closingStat", label: "Closing stat (replaces center %)", type: "text", placeholder: "e.g. $2.4B AUM" },
+      { key: "sourceText", label: "Source / disclaimer text", type: "text", placeholder: "e.g. Internal data, Q2 2026" },
+      { key: "musicFile", label: "Background music", type: "audio" },
+    ],
+    exampleJson: {
+      title: "Where Our Budget Goes",
+      subtitle: "2026 Breakdown",
+      segments: [
+        { name: "Engineering", share: 45, color: "#00E5FF" },
+        { name: "Marketing", share: 30, color: "#FF2E9A" },
+        { name: "Operations", share: 25, color: "#FDB44B" },
+      ],
+      centerLabel: "Total",
+      closingStat: "$2.4M Budget",
+      sourceText: "Internal data — Q2 2026",
+      musicFile: "in-slow-motion-inspiring-ambient-lounge-219592.mp3",
     },
   },
 ];

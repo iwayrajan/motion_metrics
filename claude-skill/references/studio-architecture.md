@@ -16,10 +16,10 @@ The chat workflow (this skill's main sections) costs real tokens and time per vi
 `process.env.HOME` was `/root` inside the Next.js server process, not the actual user directory where the Puppeteer Chrome cache lived — the Chrome-binary lookup silently failed and Remotion tried (and failed, network-blocked) to download its own copy. Fixed by checking multiple hardcoded absolute paths, not just `$HOME`, in `findCachedChrome()`. On the person's own laptop this specific failure mode may not occur (normal environments usually have working Chrome auto-download), but the hardened lookup function doesn't hurt and is already in place.
 
 ## Status
-- **4 templates wired up**: `showcase-card`, `price-chart`, `countdown`, and `tips-carousel` (the original BiodataBuilder vertical shorts — hook + bullets + CTA, no image needed). `tips-carousel` was the fastest addition so far since the composition already accepted a `content` prop from day one — only needed `calculateMetadata` registration + a schema entry + a `buildContent` case, no composition rewrite.
-- Confirmed the "reuse an already-built composition" strategy (from this file's own guidance) pays off in proportion to how parameterized the source composition already was — `tips-carousel` took a fraction of the time `price-chart`/`countdown` did precisely because it needed zero generalization work.
-- All four regression-tested together via curl after adding #4.
-- 6 templates remaining.
+- **5 templates wired up**: `showcase-card`, `price-chart`, `countdown`, `tips-carousel`, and `donut-chart` (new — first arc/SVG-rotation-based template; each segment is its own `<circle>` with `strokeDasharray`/`strokeDashoffset` for the draw-in and an SVG `rotate()` transform for positioning, computed arithmetically per-frame rather than via nested `<Sequence>` — Sequence's default AbsoluteFill wrapper can't validly nest inside `<svg>`, so per-segment stagger timing is done by hand from the shared parent frame, same pattern as `PriceLine`'s per-point reveal).
+- `donut-chart`'s arc geometry was verified with actual pixel sampling (not just "the render succeeded") since it was new, error-prone SVG rotation math — sampled ring colors at known angles and confirmed segment boundaries land exactly where the share percentages predict. Worth repeating this kind of check (not full frame-by-frame viewing, just targeted pixel/geometry validation) for any future template doing custom SVG path/arc math, even under the "skip automated verification" default — genuinely novel geometry is exactly the carve-out case mentioned in SKILL.md's Verification section.
+- All five regression-tested together via curl.
+- 5 templates remaining.
 
 ## Known limitations, by design (MVP, not yet a multi-user product)
 - No render queue (BullMQ or similar) — fine for one person clicking a button occasionally, not for concurrent multi-user traffic.

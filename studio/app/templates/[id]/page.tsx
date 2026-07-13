@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { templates, audioCatalog, TemplateField } from "@/lib/templates";
 
-type FieldValue = string | File | null | { text?: string; top?: number; label?: string; value?: number; pointIndex?: number; color?: string; name?: string; unitSuffix?: string; note?: string }[];
+type FieldValue = string | File | null | { text?: string; top?: number; label?: string; value?: number; pointIndex?: number; color?: string; name?: string; unitSuffix?: string; note?: string; share?: number }[];
 
 export default function TemplateFormPage() {
   const params = useParams();
@@ -40,7 +40,7 @@ export default function TemplateFormPage() {
   const getList = (key: string) => (Array.isArray(values[key]) ? (values[key] as any[]) : []);
   const updateListItem = (key: string, i: number, field: string, val: string) => {
     const list = [...getList(key)];
-    const parsedVal = field === "top" || field === "value" || field === "pointIndex" ? Number(val) : val;
+    const parsedVal = field === "top" || field === "value" || field === "pointIndex" || field === "share" ? Number(val) : val;
     list[i] = { ...list[i], [field]: parsedVal };
     setValue(key, list);
   };
@@ -158,6 +158,23 @@ export default function TemplateFormPage() {
           </>
         );
       }
+      case "segmentList": {
+        const list = getList(field.key);
+        return (
+          <>
+            {list.map((row: any, i: number) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                <input style={{ ...inputStyle, marginBottom: 0, flex: 1 }} value={row.name || ""} onChange={(e) => updateListItem(field.key, i, "name", e.target.value)} placeholder="Segment name" />
+                <input style={{ ...inputStyle, marginBottom: 0, width: 90 }} type="number" value={row.share ?? 0} onChange={(e) => updateListItem(field.key, i, "share", e.target.value)} placeholder="Share %" />
+                <input style={{ ...inputStyle, marginBottom: 0, width: 90 }} value={row.color || ""} onChange={(e) => updateListItem(field.key, i, "color", e.target.value)} placeholder="#hex" />
+                <button type="button" onClick={() => removeListItem(field.key, i)} style={{ background: "none", border: "none", color: "#8a7fae", cursor: "pointer" }}>✕</button>
+              </div>
+            ))}
+            <div style={{ fontSize: 12, color: "#6b6084", marginBottom: 8 }}>Shares don't need to sum to exactly 100 — they're normalized automatically.</div>
+            <button type="button" onClick={() => addListItem(field.key, { name: "", share: 0, color: "" }, field.maxItems)} style={{ marginBottom: 16, background: "none", border: "1px solid #2b2440", color: "#8a7fae", borderRadius: 8, padding: "6px 12px", cursor: "pointer" }}>+ Add segment</button>
+          </>
+        );
+      }
       default:
         return null;
     }
@@ -231,7 +248,7 @@ export default function TemplateFormPage() {
       const v = values[field.key];
       if (field.type === "image") {
         if (v instanceof File) formData.set(field.key, v);
-      } else if (field.type === "calloutList" || field.type === "pointList" || field.type === "pointCalloutList" || field.type === "rankedItemList") {
+      } else if (field.type === "calloutList" || field.type === "pointList" || field.type === "pointCalloutList" || field.type === "rankedItemList" || field.type === "segmentList") {
         formData.set(field.key, JSON.stringify(v || []));
       } else {
         formData.set(field.key, (v as string) || "");

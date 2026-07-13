@@ -87,4 +87,24 @@ This only bites once a studio has 2+ templates with `calculateMetadata` function
 ```
 **Why this didn't affect any other composition's staggered lists** (bars, callouts, ranked-item slides): everything else built so far already self-positions via explicit absolute coordinates computed by the component itself (e.g. `left: pointX(i)`, `top: ${top}%`) — wrapping an already-absolutely-positioned element in another full-screen absolute wrapper is redundant but harmless, since both cover the same area. It's specifically **flex/grid-flow children** (like `BulletRow`, which relies on its parent's `flexDirection: column` to stack) that break. When adding a new template: if a staggered list of items looks like it should flow normally (stack vertically/horizontally via the parent's layout, not each individually positioned), reach for `layout="none"` from the start rather than discovering the overlap after rendering.
 
-**Process note**: automated frame verification is **not** the default anymore (the person checks renders manually to save tokens/time — see the Verification section of the main SKILL.md). That means these bugs will now surface via the person watching the actual render and reporting back, not via an automated check catching them first. When that happens: fix the root cause, generalize the lesson into this file (as has been done for all five bugs above), and don't assume a re-render is wanted — ask.
+## 6. `<Sequence>` can't validly wrap children inside `<svg>`
+**What happened (caught before it shipped, while building `donut-chart`)**: the natural instinct for staggering each donut segment's draw-in animation is to wrap each `<circle>` in its own `<Sequence from={i * DRAW_DURATION}>`, matching the pattern used for staggered non-SVG elements elsewhere. But `<Sequence>` defaults to wrapping its children in an `AbsoluteFill` (a `<div>`) — and a `<div>` can't validly nest inside an `<svg>` element. Even with `layout="none"` this is still using React-in-SVG in a way that risks subtle rendering issues across browsers/Chrome versions.
+
+**The fix, generalized**: for any staggered animation where the elements must live inside a single `<svg>` (arcs, paths, multiple `<circle>`/`<path>` elements sharing one coordinate space), don't use nested `<Sequence>` at all — compute each element's own local reveal progress arithmetically from the shared parent's `useCurrentFrame()`, the same way `PriceLine`'s per-point dot/label reveal already worked:
+```ts
+// WRONG — Sequence wraps each circle in a div, invalid inside <svg>
+{segments.map((s, i) => (
+  <Sequence from={i * DRAW_DURATION}><circle ... /></Sequence>
+))}
+
+// RIGHT — one shared frame, per-segment progress computed by hand
+const frame = useCurrentFrame();
+{segments.map((s, i) => {
+  const localFrame = Math.max(frame - i * DRAW_DURATION, 0);
+  const progress = interpolate(localFrame, [0, DRAW_DURATION], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return <circle key={i} ... />;
+})}
+```
+Rule of thumb: reach for nested `<Sequence>` for staggering distinct HTML/React components; reach for arithmetic per-element frame offsets for staggering multiple primitives inside one `<svg>`.
+
+**Process note**: automated frame verification is **not** the default anymore (the person checks renders manually to save tokens/time — see the Verification section of the main SKILL.md). That means these bugs will now surface via the person watching the actual render and reporting back, not via an automated check catching them first. When that happens: fix the root cause, generalize the lesson into this file (as has been done for all six bugs above), and don't assume a re-render is wanted — ask.

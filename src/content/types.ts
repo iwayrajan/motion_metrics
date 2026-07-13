@@ -51,4 +51,18 @@ export type CountdownContent = {
   musicFile?: string;
 };
 
-export type VideoContent = TipsCarouselContent | ShowcaseCardContent | PriceChartContent | CountdownContent;
+export type DonutSegment = { name: string; share: number; color?: string }; // share should sum to ~100 across all segments
+
+export type DonutChartContent = {
+  type: "DonutChart";
+  id: string;
+  title: string;
+  subtitle: string;
+  segments: DonutSegment[]; // 3-7 ideal — more gets visually cluttered
+  centerLabel?: string; // e.g. "Total" shown under the running % while segments draw
+  closingStat?: string; // e.g. "$2.4B AUM" — center text crossfades to this once fully drawn
+  sourceText?: string;
+  musicFile?: string;
+};
+
+export type VideoContent = TipsCarouselContent | ShowcaseCardContent | PriceChartContent | CountdownContent | DonutChartContent;

@@ -109,6 +109,19 @@ async function buildContent(templateId: string, formData: FormData) {
       musicFile: str(formData, "musicFile") || undefined,
     };
   }
+  if (templateId === "donut-chart") {
+    return {
+      type: "DonutChart" as const,
+      id: `studio-${Date.now()}`,
+      title: str(formData, "title"),
+      subtitle: str(formData, "subtitle"),
+      segments: json(formData, "segments"),
+      centerLabel: str(formData, "centerLabel") || undefined,
+      closingStat: str(formData, "closingStat") || undefined,
+      sourceText: str(formData, "sourceText") || undefined,
+      musicFile: str(formData, "musicFile") || undefined,
+    };
+  }
   throw new Error(`Unknown template: ${templateId}`);
 }
 

@@ -8,10 +8,12 @@ import { EthJunePrices } from "./compositions/EthJunePrices";
 import { AICompanyCountdown } from "./compositions/AICompanyCountdown";
 import { PriceChart, getPriceChartDuration } from "./compositions/PriceChart";
 import { Countdown, getCountdownDuration } from "./compositions/Countdown";
+import { DonutChart, getDonutChartDuration } from "./compositions/DonutChart";
 import { tipsMistakes } from "./content/tips-mistakes";
 import { showcaseDefault } from "./content/showcase-default";
 import { priceChartDefault } from "./content/price-chart-default";
 import { countdownDefault } from "./content/countdown-default";
+import { donutDefault } from "./content/donut-default";
 import { DURATION as POPULATION_DURATION } from "./compositions/population/config";
 import { DURATION as BTC_DURATION } from "./compositions/btc-june/config";
 import { DURATION as ETH_DURATION } from "./compositions/eth-june/config";
@@ -129,6 +131,19 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{ content: tipsMistakes }}
         calculateMetadata={({ props }) => ({
           durationInFrames: getTipsCarouselDuration(props.content.bullets.length),
+        })}
+      />
+
+      {/* Studio template #5 — donut/allocation chart. */}
+      <Composition
+        id="donut-chart"
+        component={DonutChart}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ content: donutDefault }}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: getDonutChartDuration(props.content),
         })}
       />
     </>
